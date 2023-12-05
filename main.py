@@ -11,33 +11,6 @@ load_dotenv()
 OpenAIKey = os.getenv("OPENAI_KEY")
 OpenWeatherAPI = os.getenv("OPENWEATHER")
 
-# Make the HTTP request to the OpenWeatherMap API
-response = requests.get("http://api.openweathermap.org/data/2.5/weather?q=Dublin,ie&appid="+OpenWeatherAPI)
-
-# Check if the request was successful (status code 200)
-if response.status_code == 200:
-    # Parse the JSON response
-    data = json.loads(response.text)
-
-    # Extract the weather information
-    weather_data = data.get('weather')
-
-    if weather_data and isinstance(weather_data, list) and len(weather_data) > 0:
-        weather = weather_data[0].get('description')
-        temperature = data.get('main', {}).get('temp')
-        humidity = data.get('main', {}).get('humidity')
-
-        # Print the weather information
-        print("Weather in Dublin, Ireland:")
-        print("Description:", weather)
-        print("Temperature:", temperature, "K")
-        print("Humidity:", humidity, "%")
-    else:
-        print("No weather data available.")
-else:
-    print(f"Error: {response.status_code}")
-
-
 if OpenAIKey is None:
     raise ValueError("OPENAI_KEY environment variable is not set.")
 
@@ -74,6 +47,14 @@ Otherwise, reply CONTINUE, or the reason why the task is not solved yet."""
 user_proxy.initiate_chat(
     assistant,
     message="""
-What is the weather in Dublin, Ireland today? 
+What is the weather in Dublin, Ireland today? this is my API Key: b3bfefde9a3b6606d2ce230660e6d09c
 """,
 )
+
+# Check if the user is asking about the weather
+if "weather" in user_input.lower():
+    # Add the OpenWeatherAPI variable to the user's message
+    user_input += f"\nOpenWeatherAPI: {OpenWeatherAPI}"
+
+# The assistant receives a message from the user, which contains the task description
+user_proxy.initiate_chat(assistant, message=user_input)
